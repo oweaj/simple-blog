@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { mockBlogData } from "@/tests/mockData/mockBlogData";
+import { useSession } from "next-auth/react";
 import BlogCard from "./BlogCard";
 
 const mockRouterPush = jest.fn();
 const mockBlogDelete = jest.fn();
-const mockUser = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -13,23 +13,25 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-jest.mock("@/lib/queries/blog/useBlogDelete", () => ({
+jest.mock("next-auth/react", () => ({
+  useSession: jest.fn(),
+}));
+
+jest.mock("@/app/hooks/blog/useBlog", () => ({
   useBlogDelete: () => ({
     mutate: mockBlogDelete,
   }),
 }));
 
-jest.mock("@/lib/queries/auth/useUser", () => ({
-  useUser: () => mockUser(),
-}));
-
 describe("blog card 컴포넌트", () => {
   it("해당 블로그 게시글이 작성자 본인이 아니면 모달 영역이 렌더링 되지않는다", () => {
-    mockUser.mockReturnValue({
+    (useSession as jest.Mock).mockReturnValue({
       data: {
-        _id: "another-id",
-        email: "another-email",
-        name: "another-name",
+        user: {
+          _id: "another-id",
+          email: "another-email",
+          name: "another-name",
+        },
       },
     });
     render(<BlogCard item={mockBlogData} />);
@@ -40,25 +42,30 @@ describe("blog card 컴포넌트", () => {
   });
 
   it("해당 블로그 게시글이 작성자 본인이면 모달 영역이 렌더링된다.", () => {
-    mockUser.mockReturnValue({
+    (useSession as jest.Mock).mockReturnValue({
       data: {
-        _id: mockBlogData.user_id._id,
-        email: mockBlogData.user_id.email,
-        name: mockBlogData.user_id.name,
+        user: {
+          _id: mockBlogData.user_id._id,
+          email: mockBlogData.user_id.email,
+          name: mockBlogData.user_id.name,
+        },
       },
     });
     render(<BlogCard item={mockBlogData} />);
 
+    screen.debug();
     expect(screen.getByLabelText("블로그 옵션 트리거")).toBeInTheDocument();
   });
 
   describe("모달 open 상태", () => {
     beforeEach(() => {
-      mockUser.mockReturnValue({
+      (useSession as jest.Mock).mockReturnValue({
         data: {
-          _id: mockBlogData.user_id._id,
-          email: mockBlogData.user_id.email,
-          name: mockBlogData.user_id.name,
+          user: {
+            _id: mockBlogData.user_id._id,
+            email: mockBlogData.user_id.email,
+            name: mockBlogData.user_id.name,
+          },
         },
       });
       render(<BlogCard item={mockBlogData} />);
