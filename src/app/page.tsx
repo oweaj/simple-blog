@@ -3,6 +3,8 @@ import {
   QueryClient,
   dehydrate,
 } from "@tanstack/react-query";
+import { LoaderCircle } from "lucide-react";
+import { Suspense } from "react";
 import { blogListAction } from "./actions/blog";
 import MainContent from "./blog/_components/MainContent";
 
@@ -19,7 +21,15 @@ const Home = async () => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MainContent category={category} page={page} keyword={keyword} />
+      <Suspense
+        fallback={
+          <div className="h-full flex justify-center items-center">
+            <LoaderCircle />
+          </div>
+        }
+      >
+        <MainContent category={category} page={page} keyword={keyword} />
+      </Suspense>
     </HydrationBoundary>
   );
 };
