@@ -1,7 +1,7 @@
 "use client";
 
 import FormWrapper from "@/app/blog/_components/FormWrapper";
-import { useNoticeDetail } from "@/lib/queries/my/useMyNoticeDetail";
+import { useNoticeDetail } from "@/app/hooks/my/useMy";
 import { useParams } from "next/navigation";
 
 const NoticeEdit = () => {
