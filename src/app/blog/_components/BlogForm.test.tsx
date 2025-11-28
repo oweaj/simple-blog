@@ -17,20 +17,13 @@ window.confirm = jest.fn();
 
 jest.mock("next-navigation-guard");
 
-jest.mock("@/lib/api/blog/blog", () => ({
-  blogImageUploadApi: () => mockBlogImageUpload(),
+jest.mock("@/lib/api/image", () => ({
+  uploadImageApi: () => mockBlogImageUpload(),
 }));
 
-jest.mock("@/lib/queries/blog/useBlogCreate", () => ({
-  useBlogCreate: () => ({
-    mutate: mockBlogCreate,
-  }),
-}));
-
-jest.mock("@/lib/queries/blog/useBlogUpdate", () => ({
-  useBlogUpdate: () => ({
-    mutate: mockBlogUpdate,
-  }),
+jest.mock("@/app/hooks/blog/useBlog", () => ({
+  useBlogCreate: () => ({ mutate: mockBlogCreate }),
+  useBlogUpdate: () => ({ mutate: mockBlogUpdate }),
 }));
 
 describe("blogform 컴포넌트", () => {
@@ -107,11 +100,11 @@ describe("blogform 컴포넌트", () => {
     });
 
     // 이미지 업로드
+    mockBlogImageUpload.mockResolvedValue(mockBlogData.main_image);
+
     const file = new File(["test-image"], mockBlogData.main_image, {
       type: "image/jpeg",
     });
-
-    mockBlogImageUpload.mockResolvedValue({ url: mockBlogData.main_image });
 
     fireEvent.click(screen.getByTestId("main-image-upload"));
     fireEvent.change(screen.getByTestId("main-image-upload"), {
