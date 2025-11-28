@@ -1,26 +1,23 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { signupAction } from "@/app/actions/auth";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import AuthForm from "./AuthForm";
 
-const mockSignin = jest.fn();
-const mockSignup = jest.fn();
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-  }),
+  useRouter: jest.fn(),
 }));
 
-jest.mock("@/lib/queries/auth/useSignin", () => ({
-  useSignin: () => ({
-    mutate: mockSignin,
-  }),
+jest.mock("@/app/actions/auth", () => ({
+  signupAction: jest.fn(),
 }));
 
-jest.mock("@/lib/queries/auth/useSignup", () => ({
-  useSignup: () => ({
-    mutate: mockSignup,
-  }),
+jest.mock("next-auth/react", () => ({
+  signIn: jest.fn(),
 }));
 
 describe("로그인 및 회원가입 공통 인증 form 컴포넌트", () => {
@@ -57,6 +54,11 @@ describe("로그인 및 회원가입 공통 인증 form 컴포넌트", () => {
   });
 
   it("회원가입 폼 제출 시 회원가입 성공", async () => {
+    (signupAction as jest.Mock).mockResolvedValue({
+      state: true,
+      message: "회원가입이 완료되었습니다.",
+    });
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
     render(<AuthForm submit="signup" />);
 
     fireEvent.change(screen.getByLabelText("닉네임"), {
@@ -75,16 +77,19 @@ describe("로그인 및 회원가입 공통 인증 form 컴포넌트", () => {
     fireEvent.click(screen.getByRole("button", { name: "회원가입" }));
 
     await waitFor(() => {
-      expect(mockSignup).toHaveBeenCalledWith({
+      expect(signupAction).toHaveBeenCalledWith({
         name: "테스트",
         email: "test@test.com",
         password: "test1234",
         passwordConfirm: "test1234",
       });
+      expect(mockPush).toHaveBeenCalledWith("/auth/signin");
     });
   });
 
   it("로그인 폼 제출 시 로그인 성공", async () => {
+    (signIn as jest.Mock).mockResolvedValue({ ok: true });
+    (useRouter as jest.Mock).mockReturnValue({ replace: mockReplace });
     render(<AuthForm submit="signin" />);
 
     fireEvent.change(screen.getByLabelText("이메일"), {
@@ -97,10 +102,12 @@ describe("로그인 및 회원가입 공통 인증 form 컴포넌트", () => {
     fireEvent.click(screen.getByRole("button", { name: "로그인" }));
 
     await waitFor(() => {
-      expect(mockSignin).toHaveBeenCalledWith({
+      expect(signIn).toHaveBeenCalledWith("credentials", {
         email: "test@test.com",
         password: "test1234",
+        redirect: false,
       });
     });
+    expect(mockReplace).toHaveBeenCalledWith("/");
   });
 });
