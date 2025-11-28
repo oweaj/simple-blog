@@ -3,7 +3,6 @@ import {
   QueryClient,
   dehydrate,
 } from "@tanstack/react-query";
-import { Suspense } from "react";
 import { blogListAction } from "./actions/blog";
 import MainContent from "./blog/_components/MainContent";
 
@@ -20,9 +19,7 @@ const Home = async () => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <MainContent category={category} page={page} keyword={keyword} />
-      </Suspense>
+      <MainContent category={category} page={page} keyword={keyword} />
     </HydrationBoundary>
   );
 };
