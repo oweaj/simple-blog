@@ -6,7 +6,7 @@ import BlogList from "./BlogList";
 const mockBlogList = jest.fn();
 const mockHandleQueryChange = jest.fn();
 
-jest.mock("@/lib/queries/blog/useBlogList", () => ({
+jest.mock("@/app/hooks/blog/useBlog", () => ({
   useBlogList: (args: any) => mockBlogList(args),
 }));
 

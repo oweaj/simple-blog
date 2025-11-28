@@ -53,7 +53,6 @@ describe("blog card 컴포넌트", () => {
     });
     render(<BlogCard item={mockBlogData} />);
 
-    screen.debug();
     expect(screen.getByLabelText("블로그 옵션 트리거")).toBeInTheDocument();
   });
 

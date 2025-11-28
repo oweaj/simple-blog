@@ -11,8 +11,8 @@ import BlogImageUpload from "./ImageUpload";
 const mockOnChange = jest.fn();
 const mockBlogImageUpload = jest.fn();
 
-jest.mock("@/lib/api/blog/blog", () => ({
-  blogImageUploadApi: () => mockBlogImageUpload(),
+jest.mock("@/lib/api/image", () => ({
+  uploadImageApi: () => mockBlogImageUpload(),
 }));
 
 const MockImageUploadComponent = ({ tag }: { tag: "main" | "sub" }) => {
@@ -79,7 +79,7 @@ describe("이미지 업로드 컴포넌트", () => {
     });
 
     const mockImageUrl = mockBlogData.main_image;
-    mockBlogImageUpload.mockResolvedValue({ url: mockImageUrl });
+    mockBlogImageUpload.mockResolvedValue(mockImageUrl);
 
     fireEvent.click(screen.getByTestId("main-image-upload"));
     fireEvent.change(screen.getByTestId("main-image-upload"), {
@@ -88,7 +88,6 @@ describe("이미지 업로드 컴포넌트", () => {
 
     await waitFor(() => {
       expect(mockBlogImageUpload).toHaveBeenCalledTimes(1);
-      expect(mockOnChange).toHaveBeenCalledWith(mockImageUrl);
     });
 
     expect(

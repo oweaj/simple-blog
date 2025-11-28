@@ -12,6 +12,11 @@ interface ITabProps {
 
 const queryClient = new QueryClient();
 const mockHandleQueryChange = jest.fn();
+const mockBlogListAction = jest.fn();
+
+jest.mock("@/app/actions/blog", () => ({
+  blogListAction: () => mockBlogListAction(),
+}));
 
 describe("tab 컴포넌트", () => {
   beforeEach(() => {

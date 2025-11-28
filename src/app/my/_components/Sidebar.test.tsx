@@ -1,25 +1,25 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { mockBlogData } from "@/tests/mockData/mockBlogData";
+import { useSession } from "next-auth/react";
 import Sidebar from "./Sidebar";
 
 const mockUserDelete = jest.fn();
-const mockUser = jest.fn();
 
-jest.mock("@/lib/queries/auth/useUserDelete", () => ({
-  useUserDelete: () => ({
-    mutate: mockUserDelete,
-  }),
+jest.mock("@/app/hooks/auth/useAuth", () => ({
+  useUserDelete: () => ({ mutate: mockUserDelete }),
 }));
 
-jest.mock("@/lib/queries/auth/useUser", () => ({
-  useUser: () => mockUser(),
+jest.mock("next-auth/react", () => ({
+  useSession: jest.fn(),
 }));
 
 describe("마이페이지 사이드바", () => {
   beforeEach(() => {
-    mockUser.mockReturnValue({
-      data: { email: mockBlogData.user_id.email },
+    (useSession as jest.Mock).mockReturnValue({
+      data: {
+        user: { email: mockBlogData.user_id.email },
+      },
     });
     render(<Sidebar />);
   });

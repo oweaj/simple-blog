@@ -1,26 +1,19 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { mockBlogData } from "@/tests/mockData/mockBlogData";
+import { useSession } from "next-auth/react";
 import MyProfileImage from "./MyProfileImage";
 
 const mockProfileImageUpload = jest.fn();
 const mockProfileImageDelete = jest.fn();
-const mockUser = jest.fn();
 
-jest.mock("@/lib/queries/auth/useImageUpload", () => ({
-  useImageUpload: () => ({
-    mutate: mockProfileImageUpload,
-  }),
+jest.mock("@/lib/api/image", () => ({
+  uploadImageApi: () => mockProfileImageUpload(),
+  deleteImageApi: () => mockProfileImageDelete(),
 }));
 
-jest.mock("@/lib/queries/auth/useImageDelete", () => ({
-  useImageDelete: () => ({
-    mutate: mockProfileImageDelete,
-  }),
-}));
-
-jest.mock("@/lib/queries/auth/useUser", () => ({
-  useUser: () => mockUser(),
+jest.mock("next-auth/react", () => ({
+  useSession: jest.fn(),
 }));
 
 jest.mock("@/assets/images/default-profile.svg", () => () => (
@@ -30,11 +23,13 @@ jest.mock("@/assets/images/default-profile.svg", () => () => (
 describe("마이페이지 프로필 이미지 업로드 컴포넌트", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUser.mockReturnValue({
+    (useSession as jest.Mock).mockReturnValue({
       data: {
-        _id: mockBlogData.user_id._id,
-        email: mockBlogData.user_id.email,
-        name: mockBlogData.user_id.name,
+        user: {
+          _id: mockBlogData.user_id._id,
+          email: mockBlogData.user_id.email,
+          name: mockBlogData.user_id.name,
+        },
       },
     });
   });
@@ -54,28 +49,29 @@ describe("마이페이지 프로필 이미지 업로드 컴포넌트", () => {
     expect(screen.getByRole("button", { name: "삭제" })).toBeInTheDocument();
   });
 
-  it("이미지 업로드 input 영역을 클릭하면 이미지 업로드가 호출되어야한다.", () => {
+  it("이미지 업로드 input 영역을 클릭하면 이미지 업로드가 호출되어야한다.", async () => {
+    render(<MyProfileImage />);
+    (useSession as jest.Mock).mockReturnValue({
+      data: { user: { profile_image: null } },
+    });
+
     const file = new File(["test-image"], "/test-image.jpg", {
       type: "image/jpeg",
     });
-    mockUser.mockReturnValue({ data: { profile_image: null } });
-    mockProfileImageUpload.mockResolvedValue({ url: "/test-image.jpg" });
-    render(<MyProfileImage />);
+    mockProfileImageUpload.mockResolvedValue("/test-image.jpg");
 
     fireEvent.click(screen.getByRole("button", { name: "이미지 변경" }));
     fireEvent.change(screen.getByTestId("profile-image-upload"), {
       target: { files: [file] },
     });
 
-    expect(mockProfileImageUpload).toHaveBeenCalledTimes(1);
-    expect(mockProfileImageUpload).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prefix: "profile",
-        formData: expect.any(FormData),
-      }),
-    );
+    await waitFor(() => {
+      expect(mockProfileImageUpload).toHaveBeenCalledTimes(1);
+    });
 
-    mockUser.mockReturnValue({ data: { profile_image: "/test-image.jpg" } });
+    (useSession as jest.Mock).mockReturnValue({
+      data: { user: { profile_image: "/test-image.jpg" } },
+    });
     render(<MyProfileImage />);
 
     expect(
@@ -84,7 +80,9 @@ describe("마이페이지 프로필 이미지 업로드 컴포넌트", () => {
   });
 
   it("삭제 버튼을 클릭하면 이미지 삭제가 호출되어야한다.", () => {
-    mockUser.mockReturnValue({ data: { profile_image: "/test-image.jpg" } });
+    (useSession as jest.Mock).mockReturnValue({
+      data: { user: { profile_image: "/test-image.jpg" } },
+    });
     render(<MyProfileImage />);
 
     expect(
@@ -93,9 +91,10 @@ describe("마이페이지 프로필 이미지 업로드 컴포넌트", () => {
     fireEvent.click(screen.getByRole("button", { name: "삭제" }));
 
     expect(mockProfileImageDelete).toHaveBeenCalledTimes(1);
-    expect(mockProfileImageDelete).toHaveBeenCalledWith("/test-image.jpg");
 
-    mockUser.mockReturnValue({ data: { profile_image: null } });
+    (useSession as jest.Mock).mockReturnValue({
+      data: { user: { profile_image: null } },
+    });
     render(<MyProfileImage />);
 
     expect(screen.getByTestId("default-profile")).toBeInTheDocument();

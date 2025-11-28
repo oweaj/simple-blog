@@ -2,18 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Header from "@/components/home/Header";
 import { mockBlogData } from "@/tests/mockData/mockBlogData";
+import { signOut, useSession } from "next-auth/react";
 
-const mockLogout = jest.fn();
 const mockAlert = jest.fn();
 const mockRouterPush = jest.fn();
-const mockUser = jest.fn();
 window.alert = mockAlert;
-
-jest.mock("@/lib/queries/auth/useLogout", () => ({
-  useLogout: () => ({
-    mutate: mockLogout,
-  }),
-}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -21,18 +14,21 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-jest.mock("@/lib/queries/auth/useUser", () => ({
-  useUser: () => mockUser(),
+jest.mock("next-auth/react", () => ({
+  useSession: jest.fn(),
+  signOut: jest.fn(),
 }));
 
 describe("헤더 컴포넌트", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUser.mockReturnValue({
+    (useSession as jest.Mock).mockReturnValue({
       data: {
-        _id: mockBlogData.user_id._id,
-        email: mockBlogData.user_id.email,
-        name: mockBlogData.user_id.name,
+        user: {
+          _id: mockBlogData.user_id._id,
+          email: mockBlogData.user_id.email,
+          name: mockBlogData.user_id.name,
+        },
       },
     });
   });
@@ -52,7 +48,7 @@ describe("헤더 컴포넌트", () => {
   });
 
   it("로그아웃 실패시 에러 메시지가 표시된다.", () => {
-    mockLogout.mockImplementation(() => {
+    (signOut as jest.Mock).mockImplementation(() => {
       const errorLogout = new Error("로그아웃 실패 메세지");
       alert(errorLogout.message);
     });
@@ -64,7 +60,7 @@ describe("헤더 컴포넌트", () => {
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "로그아웃" }));
-    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(signOut as jest.Mock).toHaveBeenCalledTimes(1);
     expect(mockAlert).toHaveBeenCalledWith("로그아웃 실패 메세지");
   });
 
@@ -76,7 +72,7 @@ describe("헤더 컴포넌트", () => {
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "로그아웃" }));
-    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(signOut as jest.Mock).toHaveBeenCalledTimes(1);
   });
 
   it("마이페이지 링크 클릭시 마이페이지로 이동된다.", () => {

@@ -14,16 +14,9 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-jest.mock("@/lib/queries/my/useNoticeCreate", () => ({
-  useNoticeCreate: () => ({
-    mutate: mockNoticeCreate,
-  }),
-}));
-
-jest.mock("@/lib/queries/my/useMyNoticeUpdate", () => ({
-  useNoticeUpdate: () => ({
-    mutate: mockNoticeUpdate,
-  }),
+jest.mock("@/app/hooks/my/useMy", () => ({
+  useNoticeCreate: () => ({ mutate: mockNoticeCreate }),
+  useNoticeUpdate: () => ({ mutate: mockNoticeUpdate }),
 }));
 
 describe("마이페이지 notice 컴포넌트", () => {

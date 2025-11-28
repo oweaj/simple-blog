@@ -14,20 +14,10 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-jest.mock("@/lib/queries/blog/useBlogDetail", () => ({
+jest.mock("@/app/hooks/blog/useBlog", () => ({
   useBlogDetail: () => mockBlogDetail(),
-}));
-
-jest.mock("@/lib/queries/blog/useBlogDelete", () => ({
-  useBlogDelete: () => ({
-    mutate: mockBlogDelete,
-  }),
-}));
-
-jest.mock("@/lib/queries/blog/useBlogLike", () => ({
-  useBlogLike: () => ({
-    mutate: mockBlogLike,
-  }),
+  useBlogDelete: () => ({ mutate: mockBlogDelete }),
+  useBlogLike: () => ({ mutate: mockBlogLike }),
 }));
 
 jest.mock("next/image", () => {
@@ -39,11 +29,10 @@ jest.mock("next/image", () => {
 describe("상세페이지 컴포넌트", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockBlogDetail.mockReturnValue(mockBlogData);
+    mockBlogDetail.mockReturnValue({ data: mockBlogData });
   });
 
   it("상세 데이터가 있을경우 해당 데이터를 렌더링한다", () => {
-    mockBlogDetail.mockReturnValue(mockBlogData);
     render(<BlogDetail id={mockBlogData._id} />);
 
     expect(screen.getByText(mockBlogData.title)).toBeInTheDocument();
@@ -61,7 +50,7 @@ describe("상세페이지 컴포넌트", () => {
   });
 
   it("상세 데이터가 없을경우 null을 반환한다.", () => {
-    mockBlogDetail.mockReturnValue(null);
+    mockBlogDetail.mockReturnValue({ data: null });
 
     const { container } = render(<BlogDetail id={mockBlogData._id} />);
     expect(container.firstChild).toBeNull();
@@ -88,7 +77,7 @@ describe("상세페이지 컴포넌트", () => {
 
     it("해당 블로그에 이미 공감을 했다면 공감 카운트를 감소할 수 있다", () => {
       const mockUpdateData = { ...mockBlogData, isLiked: true };
-      mockBlogDetail.mockReturnValue(mockUpdateData);
+      mockBlogDetail.mockReturnValue({ data: mockUpdateData });
       render(<BlogDetail id={mockBlogData._id} />);
 
       expect(mockUpdateData.isLiked).toBe(true);
@@ -103,7 +92,7 @@ describe("상세페이지 컴포넌트", () => {
   describe("블로그 데이터 수정 권한", () => {
     it("블로그 작성자가 본인이면 상세페이지에 수정 및 삭제 권한이 있다", () => {
       const mockUpdateData = { ...mockBlogData, isWriter: true };
-      mockBlogDetail.mockReturnValue(mockUpdateData);
+      mockBlogDetail.mockReturnValue({ data: mockUpdateData });
       render(<BlogDetail id={mockBlogData._id} />);
 
       expect(mockUpdateData.isWriter).toBe(true);
