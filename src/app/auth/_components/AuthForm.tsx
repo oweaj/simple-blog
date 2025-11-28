@@ -40,7 +40,7 @@ const AuthForm = ({ submit }: { submit: string }) => {
       } else {
         const signup = await signupAction(data);
 
-        if (signup.ok) {
+        if (signup.state) {
           router.push("/auth/signin");
         } else {
           alert(signup.message);
