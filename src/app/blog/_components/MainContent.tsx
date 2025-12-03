@@ -6,26 +6,19 @@ import Header from "@/components/home/Header";
 import SearchBar from "@/components/home/SearchBar";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import BlogCategory from "./BlogCategory";
 import BlogList from "./BlogList";
 
 export interface IMainProps {
+  searchParams: { [key: string]: string | undefined };
   category: string | null;
   page: number;
   keyword: string | null;
 }
 
-const MainContent = ({
-  category: initialCategory,
-  page: initialPage,
-  keyword: initialKeyword,
-}: IMainProps) => {
-  const searchParams = useSearchParams();
+const MainContent = ({ searchParams, category, page, keyword }: IMainProps) => {
   const pathname = usePathname();
-  const category = searchParams.get("category") || initialCategory;
-  const page = Number(searchParams.get("page")) || initialPage;
-  const keyword = searchParams.get("keyword") || initialKeyword;
   const { data: session } = useSession();
 
   const handleQueryChange = async ({

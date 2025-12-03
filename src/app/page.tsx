@@ -3,12 +3,13 @@ import {
   QueryClient,
   dehydrate,
 } from "@tanstack/react-query";
-import { LoaderCircle } from "lucide-react";
-import { Suspense } from "react";
 import { blogListAction } from "./actions/blog";
 import MainContent from "./blog/_components/MainContent";
 
-const Home = async () => {
+type SearchParams = Promise<{ [key: string]: string | undefined }>;
+
+const Home = async (props: { searchParams: SearchParams }) => {
+  const searchParams = await props.searchParams;
   const queryClient = new QueryClient();
   const category = null;
   const page = 1;
@@ -21,15 +22,12 @@ const Home = async () => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense
-        fallback={
-          <div className="h-full flex justify-center items-center">
-            <LoaderCircle />
-          </div>
-        }
-      >
-        <MainContent category={category} page={page} keyword={keyword} />
-      </Suspense>
+      <MainContent
+        searchParams={searchParams}
+        category={searchParams.category ?? null}
+        page={Number(searchParams.page) || 1}
+        keyword={searchParams.keyword ?? null}
+      />
     </HydrationBoundary>
   );
 };

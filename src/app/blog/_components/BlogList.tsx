@@ -4,9 +4,11 @@ import { useBlogList } from "@/app/hooks/blog/useBlog";
 import type { IBlogDataType } from "@/types/blog.type";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import BlogCard from "./BlogCard";
-import type { IMainProps } from "./MainContent";
 
 interface IPageQueryType {
+  category: string | null;
+  page: number;
+  keyword: string | null;
   handleQueryChange: ({ newPage }: { newPage: number }) => void;
 }
 
@@ -15,7 +17,7 @@ const BlogList = ({
   page,
   keyword,
   handleQueryChange,
-}: IMainProps & IPageQueryType) => {
+}: IPageQueryType) => {
   const { data } = useBlogList({ category, page, keyword });
 
   if (!data) return null;
