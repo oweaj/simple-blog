@@ -6,20 +6,23 @@ import Header from "@/components/home/Header";
 import SearchBar from "@/components/home/SearchBar";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
 import BlogCategory from "./BlogCategory";
 import BlogList from "./BlogList";
 
 export interface IMainProps {
-  searchParams: { [key: string]: string | undefined };
   category: string | null;
   page: number;
   keyword: string | null;
 }
 
-const MainContent = ({ searchParams, category, page, keyword }: IMainProps) => {
-  const pathname = usePathname();
+const MainContent = ({ category, page, keyword }: IMainProps) => {
   const { data: session } = useSession();
+  const [filter, setFilter] = useState({
+    category: category,
+    page: page,
+    keyword: keyword,
+  });
 
   const handleQueryChange = async ({
     newCategory,
@@ -30,35 +33,17 @@ const MainContent = ({ searchParams, category, page, keyword }: IMainProps) => {
     newPage?: number;
     newKeyword?: string | null;
   }) => {
-    const params = new URLSearchParams(searchParams.toString());
+    setFilter(() => ({
+      category: newCategory !== undefined ? newCategory : category,
+      page: newPage !== undefined ? newPage : page,
+      keyword: newKeyword !== undefined ? newKeyword : keyword,
+    }));
 
-    if (newCategory) {
-      params.set("category", newCategory);
-      params.set("page", "1");
-      params.delete("keyword");
-    } else {
-      params.delete("category");
-      params.delete("keyword");
-    }
-
-    if (newPage) {
-      params.set("page", newPage.toString());
-    }
-
-    if (newKeyword) {
-      params.set("keyword", newKeyword);
-      params.set("page", "1");
-      params.delete("category");
-    }
-
-    const queryString = params.toString();
-    const queryUrl = queryString ? `${pathname}?${queryString}` : pathname;
-    window.history.pushState(null, "", queryUrl);
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleQueryReset = () => {
-    window.history.pushState(null, "", "/");
+    setFilter(() => ({ category: category, page: page, keyword: keyword }));
   };
 
   return (
@@ -69,18 +54,18 @@ const MainContent = ({ searchParams, category, page, keyword }: IMainProps) => {
           <div className="space-y-7">
             <div className="flex items-center justify-between max-md:flex-col max-md:items-start max-md:gap-4">
               <BlogCategory
-                category={category}
+                category={filter.category}
                 handleQueryChange={handleQueryChange}
               />
               <SearchBar
-                keyword={keyword}
+                keyword={filter.keyword}
                 handleQueryChange={handleQueryChange}
               />
             </div>
             <BlogList
-              category={category}
-              page={page}
-              keyword={keyword}
+              category={filter.category}
+              page={filter.page}
+              keyword={filter.keyword}
               handleQueryChange={handleQueryChange}
             />
           </div>

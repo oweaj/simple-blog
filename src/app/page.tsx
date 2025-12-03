@@ -11,9 +11,9 @@ type SearchParams = Promise<{ [key: string]: string | undefined }>;
 const Home = async (props: { searchParams: SearchParams }) => {
   const searchParams = await props.searchParams;
   const queryClient = new QueryClient();
-  const category = null;
-  const page = 1;
-  const keyword = null;
+  const category = searchParams.category ?? null;
+  const page = Number(searchParams.page) || 1;
+  const keyword = searchParams.keyword ?? null;
 
   await queryClient.prefetchQuery({
     queryKey: ["blog_list", category, page, keyword],
@@ -22,12 +22,7 @@ const Home = async (props: { searchParams: SearchParams }) => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MainContent
-        searchParams={searchParams}
-        category={searchParams.category ?? null}
-        page={Number(searchParams.page) || 1}
-        keyword={searchParams.keyword ?? null}
-      />
+      <MainContent category={category} page={page} keyword={keyword} />
     </HydrationBoundary>
   );
 };
