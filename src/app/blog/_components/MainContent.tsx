@@ -6,6 +6,7 @@ import Header from "@/components/home/Header";
 import SearchBar from "@/components/home/SearchBar";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BlogCategory from "./BlogCategory";
 import BlogList from "./BlogList";
@@ -18,11 +19,8 @@ export interface IMainProps {
 
 const MainContent = ({ category, page, keyword }: IMainProps) => {
   const { data: session } = useSession();
-  const [filter, setFilter] = useState({
-    category: category,
-    page: page,
-    keyword: keyword,
-  });
+  const router = useRouter();
+  const [filter, setFilter] = useState({ category, page, keyword });
 
   const handleQueryChange = async ({
     newCategory,
@@ -33,17 +31,44 @@ const MainContent = ({ category, page, keyword }: IMainProps) => {
     newPage?: number;
     newKeyword?: string | null;
   }) => {
-    setFilter(() => ({
-      category: newCategory !== undefined ? newCategory : category,
-      page: newPage !== undefined ? newPage : page,
-      keyword: newKeyword !== undefined ? newKeyword : keyword,
-    }));
+    const update = { ...filter };
 
+    const params = new URLSearchParams();
+
+    if (newCategory) {
+      update.category = newCategory;
+      update.keyword = null;
+      params.set("category", newCategory);
+      params.set("page", "1");
+      params.delete("keyword");
+    } else {
+      update.category = null;
+      update.keyword = null;
+      params.delete("category");
+      params.delete("keyword");
+    }
+
+    if (newPage) {
+      params.set("page", newPage.toString());
+    }
+
+    if (newKeyword) {
+      update.keyword = newKeyword;
+      update.category = null;
+      params.set("keyword", newKeyword);
+      params.set("page", "1");
+      params.delete("category");
+    }
+
+    setFilter(update);
+
+    router.push(`/?${params.toString()}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleQueryReset = () => {
-    setFilter(() => ({ category: category, page: page, keyword: keyword }));
+    setFilter(() => ({ category: null, page: 1, keyword: null }));
+    router.push("/");
   };
 
   return (
