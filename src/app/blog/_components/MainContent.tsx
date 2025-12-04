@@ -49,6 +49,7 @@ const MainContent = ({ category, page, keyword }: IMainProps) => {
     }
 
     if (newPage) {
+      update.page = newPage;
       params.set("page", newPage.toString());
     }
 
