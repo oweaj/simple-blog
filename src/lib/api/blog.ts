@@ -14,6 +14,7 @@ export const bloglistApi = async (
   const url = query ? `/api/blog/list?${query}` : "/api/blog/list";
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}${url}`, {
+    cache: "force-cache",
     next: { tags: ["blog_list"] },
   });
 

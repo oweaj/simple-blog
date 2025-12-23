@@ -6,6 +6,7 @@ import { Blog } from "@/lib/schemas/blog-schema";
 import type { IBlogFormDataType } from "@/types/blog.type";
 import type { Types } from "mongoose";
 import { getServerSession } from "next-auth";
+import { revalidateTag } from "next/cache";
 import { requireSession } from "./requireSession";
 
 // 블로그 리스트
@@ -66,6 +67,8 @@ export const blogCreateAction = async (data: IBlogFormDataType) => {
   });
 
   await blog.save();
+
+  revalidateTag("blog_list");
   return { state: true, message: "블로그 등록이 되었습니다." };
 };
 
@@ -84,7 +87,7 @@ export const blogUpdateAction = async ({
     throw new Error("존재하지 않는 블로그입니다.");
   }
 
-  if (blogData.user_id.toString() !== user.email.toString()) {
+  if (blogData.user_id.toString() !== user._id.toString()) {
     throw new Error("블로그 수정 권한이 없습니다.");
   }
 
@@ -101,6 +104,8 @@ export const blogUpdateAction = async ({
     { $set: updateBlogData },
     { new: true },
   );
+
+  revalidateTag("blog_list");
   return { state: true, message: "블로그 수정이 완료되었습니다.", id };
 };
 
@@ -121,6 +126,8 @@ export const blogDeleteAction = async (id: string) => {
 
   blog.deleted_at = new Date();
   await blog.save();
+
+  revalidateTag("blog_list");
   return { state: true, message: "블로그가 삭제 되었습니다." };
 };
 
