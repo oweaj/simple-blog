@@ -8,7 +8,7 @@ import type { IBlogListType } from "@/types/blog.type";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BlogCategory from "./BlogCategory";
 import BlogList from "./BlogList";
 
@@ -24,6 +24,10 @@ const MainContent = ({ initialData, category, page, keyword }: IMainProps) => {
   const router = useRouter();
   const [filter, setFilter] = useState({ category, page, keyword });
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [filter.page]);
+
   const handleQueryChange = async ({
     newCategory,
     newPage,
@@ -35,38 +39,30 @@ const MainContent = ({ initialData, category, page, keyword }: IMainProps) => {
   }) => {
     const update = { ...filter };
 
-    const params = new URLSearchParams();
-
-    if (newCategory) {
+    if (newCategory !== undefined) {
       update.category = newCategory;
       update.keyword = null;
-      params.set("category", newCategory);
-      params.set("page", "1");
-      params.delete("keyword");
-    } else {
-      update.category = null;
-      update.keyword = null;
-      params.delete("category");
-      params.delete("keyword");
+      update.page = 1;
     }
 
-    if (newPage) {
-      update.page = newPage;
-      params.set("page", newPage.toString());
-    }
-
-    if (newKeyword) {
+    if (newKeyword !== undefined) {
       update.keyword = newKeyword;
       update.category = null;
-      params.set("keyword", newKeyword);
-      params.set("page", "1");
-      params.delete("category");
+      update.page = 1;
+    }
+
+    if (newPage !== undefined) {
+      update.page = newPage;
     }
 
     setFilter(update);
 
+    const params = new URLSearchParams();
+    if (update.category) params.set("category", update.category);
+    if (update.keyword) params.set("keyword", update.keyword);
+    if (update.page) params.set("page", update.page.toString());
+
     router.push(`/?${params.toString()}`);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleQueryReset = () => {
