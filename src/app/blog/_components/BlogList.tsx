@@ -1,11 +1,12 @@
 "use client";
 
 import { useBlogList } from "@/app/hooks/blog/useBlog";
-import type { IBlogDataType } from "@/types/blog.type";
+import type { IBlogDataType, IBlogListType } from "@/types/blog.type";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import BlogCard from "./BlogCard";
 
 interface IPageQueryType {
+  initialData: IBlogListType;
   category: string | null;
   page: number;
   keyword: string | null;
@@ -13,12 +14,13 @@ interface IPageQueryType {
 }
 
 const BlogList = ({
+  initialData,
   category,
   page,
   keyword,
   handleQueryChange,
 }: IPageQueryType) => {
-  const { data } = useBlogList({ category, page, keyword });
+  const { data } = useBlogList({ initialData, category, page, keyword });
 
   if (!data) return null;
 

@@ -4,6 +4,7 @@ import BlogCreate from "@/assets/icons/icon_create.svg";
 import BottomNavbar from "@/components/home/BottomNavbar";
 import Header from "@/components/home/Header";
 import SearchBar from "@/components/home/SearchBar";
+import type { IBlogListType } from "@/types/blog.type";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,12 +13,13 @@ import BlogCategory from "./BlogCategory";
 import BlogList from "./BlogList";
 
 export interface IMainProps {
+  initialData: IBlogListType;
   category: string | null;
   page: number;
   keyword: string | null;
 }
 
-const MainContent = ({ category, page, keyword }: IMainProps) => {
+const MainContent = ({ initialData, category, page, keyword }: IMainProps) => {
   const { data: session } = useSession();
   const router = useRouter();
   const [filter, setFilter] = useState({ category, page, keyword });
@@ -89,6 +91,7 @@ const MainContent = ({ category, page, keyword }: IMainProps) => {
               />
             </div>
             <BlogList
+              initialData={initialData}
               category={filter.category}
               page={filter.page}
               keyword={filter.keyword}

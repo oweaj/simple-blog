@@ -13,10 +13,12 @@ import { useRouter } from "next/navigation";
 
 // 블로그 리스트
 export const useBlogList = ({
+  initialData,
   category,
   page,
   keyword,
 }: {
+  initialData: IBlogListType;
   category: string | null;
   page: number;
   keyword?: string | null;
@@ -24,7 +26,8 @@ export const useBlogList = ({
   return useQuery<IBlogListType>({
     queryKey: ["blog_list", category, page, keyword],
     queryFn: () => blogListAction(category, page, keyword),
-    placeholderData: (previousData) => previousData,
+    placeholderData: initialData,
+    staleTime: 0,
   });
 };
 
