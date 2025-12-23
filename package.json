@@ -29,7 +29,7 @@
     "lucide-react": "^0.487.0",
     "mongoose": "^8.19.3",
     "nanoid": "^5.1.5",
-    "next": "15.3.0",
+    "next": "15.3.8",
     "next-auth": "^4.24.13",
     "next-navigation-guard": "^0.1.2",
     "react": "^18.3.1",
