@@ -6,9 +6,9 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   const userId = session?.user?._id ?? null;
 
