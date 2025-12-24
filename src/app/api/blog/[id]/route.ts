@@ -8,14 +8,13 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   const userId = session?.user?._id ?? null;
 
   await connectDB();
 
-  const data = await Blog.findById(params.id)
-    .populate("user_id", "email name")
-    .lean();
+  const data = await Blog.findById(id).populate("user_id", "email name").lean();
 
   if (!data) {
     return NextResponse.json(
