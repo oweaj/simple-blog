@@ -24,3 +24,20 @@ export const bloglistApi = async (
 
   return res.json();
 };
+
+// 블로그 상세
+export const blogDetailApi = async (id: string) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${id}`,
+    {
+      cache: "force-cache",
+      next: { tags: ["blog_detail"] },
+    },
+  );
+
+  if (!res.ok) {
+    throw new Error("블로그 상세 조회 실패");
+  }
+
+  return res.json();
+};
