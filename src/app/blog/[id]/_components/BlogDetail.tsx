@@ -6,14 +6,18 @@ import {
   useBlogLike,
 } from "@/app/hooks/blog/useBlog";
 import PageTitle from "@/components/common/PageTitle";
+import type { IBlogDataType } from "@/types/blog.type";
 import { dateFormat } from "@/utils/dateFormat";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const BlogDetail = ({ id }: { id: string }) => {
-  const { data } = useBlogDetail({ id });
+const BlogDetail = ({
+  initialData,
+  id,
+}: { initialData: IBlogDataType; id: string }) => {
+  const { data } = useBlogDetail({ initialData, id });
   const { mutate: queryBlogDelete } = useBlogDelete();
   const { mutate: queryBlogLike } = useBlogLike();
   const router = useRouter();

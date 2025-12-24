@@ -81,10 +81,15 @@ export const useBlogDelete = () => {
 };
 
 // 블로그 상세
-export const useBlogDetail = ({ id }: { id: string }) => {
+export const useBlogDetail = ({
+  initialData,
+  id,
+}: { initialData?: IBlogDataType; id: string }) => {
   return useQuery<IBlogDataType>({
     queryKey: ["blogDetail", id],
     queryFn: () => blogDetailAction(id),
+    placeholderData: initialData,
+    staleTime: 0,
   });
 };
 

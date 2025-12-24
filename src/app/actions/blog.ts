@@ -106,6 +106,7 @@ export const blogUpdateAction = async ({
   );
 
   revalidateTag("blog_list");
+  revalidateTag("blog_detail");
   return { state: true, message: "블로그 수정이 완료되었습니다.", id };
 };
 
@@ -193,6 +194,7 @@ export const blogLikeAction = async (id: string) => {
     : { $addToSet: { like_user: user_id }, $inc: { like_count: 1 } };
 
   await Blog.findOneAndUpdate({ _id: id }, updateBlogData, { new: true });
+
   return {
     state: true,
     message: checkUserLike
